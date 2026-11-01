@@ -73,7 +73,21 @@ return [
     |
     */
 
-    'home' => '/home',
+    'home' => '/',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redirects
+    |--------------------------------------------------------------------------
+    |
+    | Fortify redirects to the home path above unless a path is set here.
+    | After logging out, users are sent back to the login screen.
+    |
+    */
+
+    'redirects' => [
+        'logout' => '/login',
+    ],
 
     /*
     |--------------------------------------------------------------------------

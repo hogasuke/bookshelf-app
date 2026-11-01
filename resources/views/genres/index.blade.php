@@ -8,7 +8,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-4 flex justify-end">
-                <a href="{{ route('genres.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <a href="{{ url('/genres/create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     ジャンルを登録
                 </a>
             </div>
@@ -48,8 +48,8 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $genre->books_count }}冊</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <a href="{{ route('genres.edit', $genre) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">編集</a>
-                                            <form action="{{ route('genres.destroy', $genre) }}" method="POST" class="inline" onsubmit="return confirm('本当に削除しますか？');" novalidate>
+                                            <a href="{{ url('/genres/'.$genre->id.'/edit') }}" class="text-indigo-600 hover:text-indigo-900 mr-3">編集</a>
+                                            <form action="{{ url('/genres/'.$genre->id) }}" method="POST" class="inline" onsubmit="return confirm('本当に削除しますか？');" novalidate>
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900">削除</button>

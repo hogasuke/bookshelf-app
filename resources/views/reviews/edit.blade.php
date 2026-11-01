@@ -13,7 +13,7 @@
                         <p class="text-gray-600">書籍: <span class="font-semibold">{{ $review->book->title }}</span></p>
                     </div>
 
-                    <form action="{{ route('reviews.update', $review) }}" method="POST" novalidate>
+                    <form action="{{ url('/reviews/'.$review->id) }}" method="POST" novalidate>
                         @csrf
                         @method('PUT')
 

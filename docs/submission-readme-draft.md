@@ -4,7 +4,7 @@
 
 ## 概要
 
-既存実装：Fortify導入、認証用Blade、基本テーブル/モデル、ER図。今回、ReviewからUser/Book、FavoriteからBookの参照を追加し、隔離DBで確認しました。books作成者IDとその削除方針は設計承認待ちです。
+既存実装：Fortify導入、認証用Blade、基本テーブル/モデル、ER図。今回、ReviewからUser/Book、FavoriteからBookの参照を追加し、隔離DBで確認しました。books作成者ID（users削除時は書籍も削除）は本人案の仮実装で、面談で確認します。
 
 ## 使用技術
 

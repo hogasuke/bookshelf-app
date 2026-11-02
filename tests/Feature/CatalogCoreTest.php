@@ -94,7 +94,6 @@ class CatalogCoreTest extends TestCase
     {
         $owner = User::factory()->create();
         $other = User::factory()->create();
-        // Ownership column migration is pending; test the policy without pretending it exists in the DB.
         $book = new Book;
         $book->forceFill(['user_id' => $owner->id]);
         foreach (['update', 'delete'] as $ability) {
@@ -158,7 +157,7 @@ class CatalogCoreTest extends TestCase
 
     private function book(int $number): Book
     {
-        return Book::create(['title' => sprintf('Book %02d', $number), 'author' => 'Test author',
+        return Book::factory()->create(['title' => sprintf('Book %02d', $number), 'author' => 'Test author',
             'isbn' => sprintf('978000000%04d', $number), 'published_date' => '2026-01-01']);
     }
 

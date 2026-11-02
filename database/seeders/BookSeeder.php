@@ -7,7 +7,6 @@ use App\Models\Genre;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use LogicException;
 
 class BookSeeder extends Seeder
@@ -28,10 +27,6 @@ class BookSeeder extends Seeder
 
     public function run(): void
     {
-        // No owner migration or legacy-data assignment is invented by this seeder.
-        if (! Schema::hasColumn('books', 'user_id')) {
-            throw new LogicException('BookSeeder requires the approved books.user_id migration. No book data was written.');
-        }
         $owner = User::firstOrFail();
         $genres = Genre::all()->keyBy('name');
         foreach (self::RECORDS as $record) {

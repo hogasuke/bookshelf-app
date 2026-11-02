@@ -69,7 +69,7 @@ class BookReadTest extends TestCase
 
     private function createBook(int $index): Book
     {
-        $book = new Book([
+        $book = Book::factory()->make([
             'title' => sprintf('Book %02d', $index),
             'author' => 'Test author',
             'isbn' => sprintf('978000000%04d', $index),

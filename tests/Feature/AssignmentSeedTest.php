@@ -13,9 +13,7 @@ use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
 use Illuminate\Database\QueryException;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use LogicException;
 use Tests\TestCase;
 
@@ -29,22 +27,8 @@ class AssignmentSeedTest extends TestCase
         $this->artisan('migrate', ['--database' => 'sqlite', '--force' => true])->assertSuccessful();
     }
 
-    public function test_unapproved_owner_schema_stops_full_seeding_and_rolls_back_all_seed_writes(): void
+    public function test_full_seed_matches_the_assignment_contract(): void
     {
-        try {
-            $this->seed(DatabaseSeeder::class);
-            $this->fail('Owner migration must be provided before full seeding.');
-        } catch (LogicException $exception) {
-            $this->assertStringContainsString('approved books.user_id migration', $exception->getMessage());
-        }
-        $this->assertDatabaseCount('users', 0);
-        $this->assertDatabaseCount('genres', 0);
-        $this->assertDatabaseCount('books', 0);
-    }
-
-    public function test_seed_contract_in_a_test_only_owner_column_fixture(): void
-    {
-        $this->addTestOnlyOwnerColumn();
         $this->seed(DatabaseSeeder::class);
 
         $this->assertDatabaseCount('users', 5);
@@ -84,7 +68,6 @@ class AssignmentSeedTest extends TestCase
 
     public function test_review_create_requirement_does_not_overwrite_sample_data_on_full_rerun(): void
     {
-        $this->addTestOnlyOwnerColumn();
         $this->seed(DatabaseSeeder::class);
         $review = Review::firstOrFail();
         $review->update(['comment' => 'Keep this existing comment']);
@@ -98,15 +81,8 @@ class AssignmentSeedTest extends TestCase
         $this->assertSame('Keep this existing comment', $review->fresh()->comment);
     }
 
-    private function addTestOnlyOwnerColumn(): void
+    public function test_book_create_core_uses_the_actor_and_rolls_back_failed_genre_binding(): void
     {
-        // A contract fixture only: no application migration, backfill or delete rule is approved here.
-        Schema::table('books', fn (Blueprint $table) => $table->unsignedBigInteger('user_id')->nullable());
-    }
-
-    public function test_book_create_core_uses_the_actor_and_rolls_back_failed_genre_binding_in_target_fixture(): void
-    {
-        $this->addTestOnlyOwnerColumn();
         $author = User::factory()->create();
         $other = User::factory()->create();
         $genre = Genre::factory()->create();

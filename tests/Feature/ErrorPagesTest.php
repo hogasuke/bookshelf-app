@@ -33,7 +33,7 @@ class ErrorPagesTest extends TestCase
 
     public function test_editing_another_users_review_shows_japanese_403_page(): void
     {
-        $book = Book::create(['title' => 'Book', 'author' => 'Author', 'isbn' => '9780000000001', 'published_date' => '2026-01-01']);
+        $book = Book::factory()->create(['title' => 'Book', 'author' => 'Author', 'isbn' => '9780000000001', 'published_date' => '2026-01-01']);
         $owner = User::factory()->create();
         $other = User::factory()->create();
         $review = Review::create(['user_id' => $owner->id, 'book_id' => $book->id, 'rating' => 4]);

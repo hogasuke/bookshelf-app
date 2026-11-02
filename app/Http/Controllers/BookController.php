@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Genre;
+use App\Services\BookWriter;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class BookController extends Controller
@@ -36,5 +38,13 @@ class BookController extends Controller
         $book->load(['genres', 'reviews.user', 'reviews.likedByUsers']);
 
         return view('books.show', compact('book'));
+    }
+
+    public function destroy(Book $book, BookWriter $writer): RedirectResponse
+    {
+        $this->authorize('delete', $book);
+        $writer->delete($book);
+
+        return redirect()->route('books.index')->with('success', '書籍を削除しました。');
     }
 }

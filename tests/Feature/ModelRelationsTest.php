@@ -59,7 +59,7 @@ class ModelRelationsTest extends TestCase
 
     private function createBook(string $isbn): Book
     {
-        return Book::create([
+        return Book::factory()->create([
             'title' => 'Relation test book',
             'author' => 'Test author',
             'isbn' => $isbn,

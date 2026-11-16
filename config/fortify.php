@@ -73,7 +73,21 @@ return [
     |
     */
 
-    'home' => '/home',
+    'home' => '/',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redirects
+    |--------------------------------------------------------------------------
+    |
+    | Fortify redirects to the home path above unless a path is set here.
+    | After logging out, users are sent back to the login screen.
+    |
+    */
+
+    'redirects' => [
+        'logout' => '/login',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -145,7 +159,7 @@ return [
 
     'features' => [
         Features::registration(),
-        Features::resetPasswords(),
+        // Features::resetPasswords(), // 要件に再設定画面が無いため無効（2026-11-16）
         // Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),

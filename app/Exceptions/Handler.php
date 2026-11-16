@@ -2,8 +2,11 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -33,6 +36,18 @@ class Handler extends ExceptionHandler
         $this->renderable(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json(['message' => '指定されたリソースが見つかりません。'], 404);
+            }
+        });
+
+        // 公開API：トークンが無い・無効なら 401、他人の書籍の更新・削除は 403（日本語のJSON）
+        $this->renderable(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => '認証が必要です。APIトークンを Authorization ヘッダーに付けてください。'], 401);
+            }
+        });
+        $this->renderable(function (AuthorizationException|AccessDeniedHttpException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'この書籍を変更する権限がありません。'], 403);
             }
         });
     }

@@ -7,6 +7,7 @@ use App\Models\Genre;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class PublicApiTest extends TestCase
@@ -22,7 +23,6 @@ class PublicApiTest extends TestCase
     private function input(array $overrides = []): array
     {
         return array_merge([
-            'user_id' => User::factory()->create()->id,
             'title' => 'API の本', 'author' => 'API 著者', 'isbn' => '9784000000009',
             'published_date' => '2021-05-01', 'genre_ids' => [Genre::factory()->create()->id],
         ], $overrides);
@@ -68,14 +68,14 @@ class PublicApiTest extends TestCase
 
     public function test_store_returns_201_and_validation_errors_return_422_in_japanese(): void
     {
-        $input = $this->input();
+        Sanctum::actingAs($user = User::factory()->create());
 
-        $this->postJson('/api/v1/books', $input)->assertCreated()
-            ->assertJsonPath('data.title', 'API の本')->assertJsonPath('data.user_id', $input['user_id']);
-        $this->assertDatabaseHas('books', ['isbn' => '9784000000009', 'user_id' => $input['user_id']]);
+        $this->postJson('/api/v1/books', $this->input())->assertCreated()
+            ->assertJsonPath('data.title', 'API の本')->assertJsonPath('data.user_id', $user->id);
+        $this->assertDatabaseHas('books', ['isbn' => '9784000000009', 'user_id' => $user->id]);
 
         $this->post('/api/v1/books', ['user_id' => 9999, 'isbn' => '123'])->assertStatus(422)
-            ->assertJsonPath('errors.user_id.0', '指定された登録者が存在しません。')
+            ->assertJsonPath('errors.user_id.0', '登録者IDは指定できません。登録者はAPIトークンの持ち主になります。')
             ->assertJsonPath('errors.title.0', 'タイトルを入力してください。')
             ->assertJsonPath('errors.isbn.0', 'ISBNは13桁の数字で入力してください。');
     }
@@ -83,6 +83,7 @@ class PublicApiTest extends TestCase
     public function test_update_keeps_own_isbn_and_missing_id_returns_404(): void
     {
         $book = Book::factory()->create(['isbn' => '9784000000010']);
+        Sanctum::actingAs($book->user);
 
         $this->putJson('/api/v1/books/'.$book->id, $this->input(['title' => '改題', 'isbn' => '9784000000010']))
             ->assertOk()->assertJsonPath('data.title', '改題');
@@ -96,6 +97,7 @@ class PublicApiTest extends TestCase
         $book = $review->book;
         $book->genres()->attach(Genre::factory()->create());
         $book->favoriteByUsers()->attach(User::factory()->create());
+        Sanctum::actingAs($book->user);
 
         $this->deleteJson('/api/v1/books/'.$book->id)->assertNoContent();
         $this->assertDatabaseMissing('books', ['id' => $book->id]);

@@ -13,12 +13,13 @@ class BookStoreRequest extends FormRequest
     }
 
     /**
-     * Web版の書籍登録と同じルールに、登録者ID（user_id）の妥当性を足す。
+     * Web版の書籍登録と同じルール。登録者は Sanctum トークンの持ち主で決まるため、
+     * user_id は送らせない（送られたら 422。他人になりすました登録を防ぐ。シート12 E18）。
      */
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'integer', 'exists:users,id'],
+            'user_id' => ['prohibited'],
             'title' => ['required', 'string', 'max:255'],
             'author' => ['required', 'string', 'max:255'],
             'isbn' => ['nullable', 'digits:13', Rule::unique('books', 'isbn')->ignore($this->route('book'))],
@@ -33,9 +34,7 @@ class BookStoreRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'user_id.required' => '登録者IDを指定してください。',
-            'user_id.integer' => '登録者IDは整数で指定してください。',
-            'user_id.exists' => '指定された登録者が存在しません。',
+            'user_id.prohibited' => '登録者IDは指定できません。登録者はAPIトークンの持ち主になります。',
             'title.required' => 'タイトルを入力してください。',
             'title.max' => 'タイトルは255文字以内で入力してください。',
             'author.required' => '著者を入力してください。',

@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Genre;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
@@ -63,8 +64,10 @@ class AdvancedBaseTest extends TestCase
 
     public function test_api_accepts_a_book_without_isbn_and_published_date(): void
     {
+        Sanctum::actingAs(User::factory()->create());
+
         $this->postJson('/api/v1/books', [
-            'user_id' => User::factory()->create()->id, 'title' => 'APIの本', 'author' => '著者',
+            'title' => 'APIの本', 'author' => '著者',
             'genre_ids' => [Genre::factory()->create()->id],
         ])->assertCreated()->assertJsonPath('data.isbn', null)->assertJsonPath('data.published_date', null);
     }

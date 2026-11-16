@@ -12,6 +12,7 @@ use Database\Seeders\BookSeeder;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\FavoriteSeeder;
 use Database\Seeders\ReviewLikeSeeder;
+use Database\Seeders\ReviewSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use LogicException;
@@ -34,10 +35,12 @@ class AssignmentSeedTest extends TestCase
         $this->assertDatabaseCount('users', 5);
         $this->assertDatabaseCount('genres', 10);
         $this->assertDatabaseCount('books', 11);
-        $this->assertDatabaseCount('reviews', 32);
-        $owner = User::firstOrFail();
-        $this->assertSame(11, $owner->books()->count());
-        $this->assertDatabaseHas('books', ['title' => '吾輩は猫である', 'author' => '夏目漱石', 'isbn' => '9784101010014', 'published_date' => '1905-01-01']);
+        // 応用：レビューは各書籍2〜4件のランダム、登録者もランダム（シート9 D11・D12）
+        $this->assertGreaterThanOrEqual(22, Review::count());
+        $this->assertLessThanOrEqual(44, Review::count());
+        $this->assertTrue(Book::all()->every(fn ($book) => User::whereKey($book->user_id)->exists()));
+        $this->assertDatabaseHas('books', ['title' => '吾輩は猫である', 'author' => '夏目漱石', 'isbn' => '9784101010014']);
+        $this->assertSame('1905-01-01', Book::where('isbn', '9784101010014')->firstOrFail()->published_date->format('Y-m-d'));
         $this->assertDatabaseHas('books', ['title' => 'コンテナ物語', 'isbn' => '9784822251468']);
         $this->assertEqualsCanonicalizing([
             '9784101010014', '9784422100524', '9784873115658', '9784863940246', '9784101010021',
@@ -50,7 +53,8 @@ class AssignmentSeedTest extends TestCase
             $this->assertNotEmpty($book->description);
             $this->assertSame('https://placehold.co/200x300/e2e8f0/475569?text='.($index + 1), $book->image_url);
         }
-        $this->assertTrue(Review::all()->every(fn ($review) => $review->rating >= 3 && $review->rating <= 5 && $review->comment !== ''));
+        $this->assertTrue(Review::all()->every(fn ($review) => $review->rating >= 1 && $review->rating <= 5
+            && $review->comment === ReviewSeeder::COMMENTS[$review->rating]));
         foreach (User::withCount('favoriteBooks')->get() as $user) {
             $this->assertGreaterThanOrEqual(3, $user->favorite_books_count);
             $this->assertLessThanOrEqual(5, $user->favorite_books_count);
@@ -70,6 +74,7 @@ class AssignmentSeedTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
         $review = Review::firstOrFail();
+        $reviewCount = Review::count();
         $review->update(['comment' => 'Keep this existing comment']);
         try {
             $this->seed(DatabaseSeeder::class);
@@ -77,7 +82,7 @@ class AssignmentSeedTest extends TestCase
         } catch (LogicException $exception) {
             $this->assertStringContainsString('already exist', $exception->getMessage());
         }
-        $this->assertDatabaseCount('reviews', 32);
+        $this->assertDatabaseCount('reviews', $reviewCount);
         $this->assertSame('Keep this existing comment', $review->fresh()->comment);
     }
 

@@ -27,7 +27,11 @@ class BookSeeder extends Seeder
 
     public function run(): void
     {
-        $owner = User::firstOrFail();
+        // 応用：マイ読書レポートで複数ユーザーの所有書籍を出すため、登録者をランダムに割り当てる。
+        $users = User::all();
+        if ($users->isEmpty()) {
+            throw new LogicException('Run UserSeeder before BookSeeder.');
+        }
         $genres = Genre::all()->keyBy('name');
         foreach (self::RECORDS as $record) {
             foreach ($record[4] as $name) {
@@ -36,12 +40,12 @@ class BookSeeder extends Seeder
                 }
             }
         }
-        DB::transaction(function () use ($owner, $genres) {
+        DB::transaction(function () use ($users, $genres) {
             foreach (self::RECORDS as $index => [$title, $author, $isbn, $date, $names]) {
                 // Only the fixed assignment dataset is unguarded, never request input.
                 $book = Book::unguarded(fn () => Book::firstOrCreate(['isbn' => $isbn], [
                     'title' => $title, 'author' => $author, 'published_date' => $date,
-                    'user_id' => $owner->id,
+                    'user_id' => $users->random()->id,
                     'description' => $title.'（模擬案件の動作確認用データ）',
                     'image_url' => 'https://placehold.co/200x300/e2e8f0/475569?text='.($index + 1),
                 ]));

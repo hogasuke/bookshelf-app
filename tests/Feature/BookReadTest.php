@@ -6,6 +6,7 @@ use App\Models\Book;
 use App\Models\Genre;
 use App\Models\Review;
 use App\Models\User;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -37,6 +38,33 @@ class BookReadTest extends TestCase
                 });
         }
         $this->get('/books?page=2')->assertOk()->assertSee('Book 01')->assertDontSee('Book 11');
+    }
+
+    public function test_book_list_query_count_does_not_grow_with_the_number_of_books(): void
+    {
+        $genres = collect(['小説', '技術'])->map(fn ($name) => Genre::create(['name' => $name]));
+        $countQueries = function (): int {
+            $count = 0;
+            DB::listen(function () use (&$count) {
+                $count++;
+            });
+            $this->get('/books')->assertOk();
+
+            return $count;
+        };
+
+        $this->createBook(1)->genres()->attach($genres->pluck('id'));
+        $this->createBook(2)->genres()->attach($genres->pluck('id'));
+        $withTwoBooks = $countQueries();
+
+        for ($index = 3; $index <= 10; $index++) {
+            $this->createBook($index)->genres()->attach($genres->pluck('id'));
+        }
+        DB::flushQueryLog();
+        $this->app['events']->forget(QueryExecuted::class);
+        $withTenBooks = $countQueries();
+
+        $this->assertSame($withTwoBooks, $withTenBooks);
     }
 
     public function test_guest_and_logged_in_user_can_read_details_with_review_author_and_like_count(): void

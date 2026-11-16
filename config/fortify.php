@@ -159,7 +159,7 @@ return [
 
     'features' => [
         Features::registration(),
-        Features::resetPasswords(),
+        // Features::resetPasswords(), // 要件に再設定画面が無いため無効（2026-11-16）
         // Features::emailVerification(),
         Features::updateProfileInformation(),
         Features::updatePasswords(),

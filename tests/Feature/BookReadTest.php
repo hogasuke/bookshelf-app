@@ -62,7 +62,7 @@ class BookReadTest extends TestCase
 
     public function test_empty_list_and_book_without_reviews_render(): void
     {
-        $this->get('/books')->assertOk()->assertSee('書籍が登録されていません。');
+        $this->get('/books')->assertOk()->assertSee('書籍が見つかりませんでした。');
         $book = $this->createBook(1);
         $this->get('/books/'.$book->id)->assertOk()->assertSee('まだレビューはありません。');
     }

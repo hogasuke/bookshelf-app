@@ -8,7 +8,6 @@ use App\Http\Requests\Api\V1\BookStoreRequest;
 use App\Http\Requests\Api\V1\BookUpdateRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
-use App\Models\User;
 use App\Services\BookWriter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -41,8 +40,8 @@ class BookController extends Controller
 
     public function store(BookStoreRequest $request, BookWriter $writer): JsonResponse
     {
-        $creator = User::findOrFail($request->validated('user_id'));
-        $book = $writer->create($creator, $request->validated(), $request->validated('genre_ids'));
+        // 登録者はトークンの持ち主（リクエストの user_id は受け付けない。シート12 E18）
+        $book = $writer->create($request->user(), $request->validated(), $request->validated('genre_ids'));
         $book->loadAvg('reviews', 'rating')->loadCount('reviews');
 
         return (new BookResource($book))->response()->setStatusCode(Response::HTTP_CREATED);
@@ -50,6 +49,7 @@ class BookController extends Controller
 
     public function update(BookUpdateRequest $request, Book $book, BookWriter $writer): BookResource
     {
+        $this->authorize('update', $book);
         $book = $writer->update($book, $request->validated(), $request->validated('genre_ids'));
         $book->loadAvg('reviews', 'rating')->loadCount('reviews');
 
@@ -58,6 +58,7 @@ class BookController extends Controller
 
     public function destroy(Book $book, BookWriter $writer): Response
     {
+        $this->authorize('delete', $book);
         $writer->delete($book);
 
         return response()->noContent();

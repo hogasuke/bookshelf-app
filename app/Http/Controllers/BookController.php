@@ -7,16 +7,24 @@ use App\Models\Book;
 use App\Models\Genre;
 use App\Services\BookWriter;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BookController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $books = Book::with('genres')->withAvg('reviews', 'rating')
-            ->latest()->orderByDesc('id')->paginate(10);
+        // keyword[]=… のような配列の値は捨てる（画面の入力欄へ戻す時に壊れるため）
+        $request->query->replace(array_filter($request->query->all(), 'is_string'));
 
-        return view('books.index', compact('books'));
+        $books = Book::with('genres')->withAvg('reviews', 'rating')
+            ->keyword($request->query('keyword'))
+            ->inGenre($request->query('genre'))
+            ->sortBy($request->query('sort'))
+            ->paginate(10)->withQueryString();
+        $genres = Genre::orderBy('name')->get();
+
+        return view('books.index', compact('books', 'genres'));
     }
 
     public function create(): View

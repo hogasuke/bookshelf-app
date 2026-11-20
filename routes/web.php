@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BookController;
+use App\Http\Controllers\BookIsbnController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GenreController;
 use App\Http\Controllers\RankingController;
@@ -23,7 +24,8 @@ Route::get('/', [BookController::class, 'index']);
 Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
 
 Route::middleware('auth')->group(function () {
-    // books/create を books/{book} より先に登録する
+    // books/create・books/isbn を books/{book} より先に登録する
+    Route::get('/books/isbn/{isbn}', BookIsbnController::class)->name('books.isbn');
     Route::resource('books', BookController::class)->except(['index', 'show']);
     Route::post('/books/{book}/favorites', [FavoriteController::class, 'toggle'])->name('books.favorites.toggle');
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('books.reviews.store');

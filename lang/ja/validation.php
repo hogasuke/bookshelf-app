@@ -165,5 +165,7 @@ return [
         'genre_ids' => 'ジャンル',
         'rating' => '評価',
         'comment' => 'コメント',
+        'book_id' => '書籍',
+        'target_date' => '期日',
     ],
 ];

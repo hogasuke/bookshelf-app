@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // 読書計画の日次バッチ（シート7 D68）。OS の cron から schedule:run を毎分呼ぶ前提。
+        $schedule->command('reading-plans:process')->dailyAt('09:00')->withoutOverlapping();
     }
 
     /**

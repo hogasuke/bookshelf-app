@@ -12,6 +12,10 @@ class BookIsbnController extends Controller
     /**
      * GET /books/isbn/{isbn}：登録・編集フォームの自動入力用に、書籍情報を JSON で返す。
      * 失敗時は {"error": "..."} を 422（形式違い）・404（該当なし）・502（API失敗）で返す。
+     *
+     * @param  string  $isbn  13桁のISBN
+     * @param  GoogleBooksClient  $client  Google Books API のクライアント
+     * @return JsonResponse JSONレスポンス
      */
     public function __invoke(string $isbn, GoogleBooksClient $client): JsonResponse
     {

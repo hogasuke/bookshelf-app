@@ -6,13 +6,20 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class TokenStoreRequest extends FormRequest
 {
+    /**
+     * このリクエスト自体では利用者を絞らない（ログインの要否はルート、本人かどうかはPolicyで判定する）。
+     *
+     * @return bool 常に true
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * 項目ごとのバリデーションルール。
+     *
+     * @return array<string, mixed> 項目ごとのバリデーションルール
      */
     public function rules(): array
     {
@@ -24,7 +31,9 @@ class TokenStoreRequest extends FormRequest
     }
 
     /**
-     * @return array<string, string>
+     * バリデーションエラーの日本語メッセージ。
+     *
+     * @return array<string, string> ルールごとのエラーメッセージ
      */
     public function messages(): array
     {

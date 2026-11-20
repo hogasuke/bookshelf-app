@@ -14,6 +14,9 @@ class TokenController extends Controller
 {
     /**
      * メールアドレスとパスワードを確かめ、書き込み系APIで使う Sanctum のトークンを発行する。
+     *
+     * @param  TokenStoreRequest  $request  リクエスト
+     * @return JsonResponse JSONレスポンス
      */
     public function store(TokenStoreRequest $request): JsonResponse
     {

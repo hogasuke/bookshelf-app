@@ -7,6 +7,11 @@ use Illuminate\Validation\Rule;
 
 class GenreRequest extends FormRequest
 {
+    /**
+     * このリクエスト自体では利用者を絞らない（ログインの要否はルート、本人かどうかはPolicyで判定する）。
+     *
+     * @return bool 常に true
+     */
     public function authorize(): bool
     {
         return true;
@@ -14,6 +19,8 @@ class GenreRequest extends FormRequest
 
     /**
      * ジャンル登録・編集で共通のルール。編集時は一意性チェックから自身を除外する。
+     *
+     * @return array<string, mixed> 項目ごとのバリデーションルール
      */
     public function rules(): array
     {
@@ -22,6 +29,11 @@ class GenreRequest extends FormRequest
         ];
     }
 
+    /**
+     * バリデーションエラーの日本語メッセージ。
+     *
+     * @return array<string, string> ルールごとのエラーメッセージ
+     */
     public function messages(): array
     {
         return [

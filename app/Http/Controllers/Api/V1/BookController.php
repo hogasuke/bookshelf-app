@@ -15,6 +15,12 @@ use Illuminate\Http\Response;
 
 class BookController extends Controller
 {
+    /**
+     * GET /api/v1/books：キーワード・ジャンルで絞った書籍一覧を、平均評価とレビュー数つきでページ分けして返す。
+     *
+     * @param  BookIndexRequest  $request  リクエスト
+     * @return AnonymousResourceCollection 書籍のJSONリソースの一覧（ページ情報つき）
+     */
     public function index(BookIndexRequest $request): AnonymousResourceCollection
     {
         $keyword = $request->validated('keyword');
@@ -31,6 +37,12 @@ class BookController extends Controller
         return BookResource::collection($books);
     }
 
+    /**
+     * GET /api/v1/books/{book}：書籍1件を、ジャンル・レビュー（投稿者つき）・平均評価・レビュー数つきで返す。
+     *
+     * @param  Book  $book  対象の書籍
+     * @return BookResource 書籍のJSONリソース
+     */
     public function show(Book $book): BookResource
     {
         $book->load(['genres', 'reviews.user'])->loadAvg('reviews', 'rating')->loadCount('reviews');
@@ -38,6 +50,13 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
+    /**
+     * POST /api/v1/books：トークンの持ち主を登録者として書籍を登録し、201で返す。
+     *
+     * @param  BookStoreRequest  $request  リクエスト
+     * @param  BookWriter  $writer  書き込みを受け持つサービス
+     * @return JsonResponse JSONレスポンス
+     */
     public function store(BookStoreRequest $request, BookWriter $writer): JsonResponse
     {
         // 登録者はトークンの持ち主（リクエストの user_id は受け付けない。シート12 E18）
@@ -47,6 +66,14 @@ class BookController extends Controller
         return (new BookResource($book))->response()->setStatusCode(Response::HTTP_CREATED);
     }
 
+    /**
+     * PUT/PATCH /api/v1/books/{book}：登録者本人だけが書籍とジャンルを更新できる。
+     *
+     * @param  BookUpdateRequest  $request  リクエスト
+     * @param  Book  $book  対象の書籍
+     * @param  BookWriter  $writer  書き込みを受け持つサービス
+     * @return BookResource 書籍のJSONリソース
+     */
     public function update(BookUpdateRequest $request, Book $book, BookWriter $writer): BookResource
     {
         $this->authorize('update', $book);
@@ -56,6 +83,13 @@ class BookController extends Controller
         return new BookResource($book);
     }
 
+    /**
+     * DELETE /api/v1/books/{book}：登録者本人だけが書籍を削除でき、204を返す。
+     *
+     * @param  Book  $book  対象の書籍
+     * @param  BookWriter  $writer  書き込みを受け持つサービス
+     * @return Response 204 No Content
+     */
     public function destroy(Book $book, BookWriter $writer): Response
     {
         $this->authorize('delete', $book);

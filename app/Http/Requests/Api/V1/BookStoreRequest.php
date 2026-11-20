@@ -7,6 +7,11 @@ use Illuminate\Validation\Rule;
 
 class BookStoreRequest extends FormRequest
 {
+    /**
+     * このリクエスト自体では利用者を絞らない（ログインの要否はルート、本人かどうかはPolicyで判定する）。
+     *
+     * @return bool 常に true
+     */
     public function authorize(): bool
     {
         return true;
@@ -15,6 +20,8 @@ class BookStoreRequest extends FormRequest
     /**
      * Web版の書籍登録と同じルール。登録者は Sanctum トークンの持ち主で決まるため、
      * user_id は送らせない（送られたら 422。他人になりすました登録を防ぐ。シート12 E18）。
+     *
+     * @return array<string, mixed> 項目ごとのバリデーションルール
      */
     public function rules(): array
     {
@@ -31,6 +38,11 @@ class BookStoreRequest extends FormRequest
         ];
     }
 
+    /**
+     * バリデーションエラーの日本語メッセージ。
+     *
+     * @return array<string, string> ルールごとのエラーメッセージ
+     */
     public function messages(): array
     {
         return [

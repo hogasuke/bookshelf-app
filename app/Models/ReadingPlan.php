@@ -34,16 +34,31 @@ class ReadingPlan extends Model
         'completed_at' => 'datetime',
     ];
 
+    /**
+     * 計画を立てた人。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * 計画の対象の書籍。
+     *
+     * @return BelongsTo<Book, $this>
+     */
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class);
     }
 
+    /**
+     * 計画が読了済みかを返す。
+     *
+     * @return bool 読了済みなら true
+     */
     public function isCompleted(): bool
     {
         return $this->status === ReadingPlanStatus::Completed;
@@ -51,6 +66,9 @@ class ReadingPlan extends Model
 
     /**
      * 読了していない計画（読書中・期限切れ）。同じ書籍の計画を重ねない判定に使う。
+     *
+     * @param  Builder<static>  $query  クエリ
+     * @return Builder<static> 絞り込んだクエリ
      */
     public function scopeOpen(Builder $query): Builder
     {

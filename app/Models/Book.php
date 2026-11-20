@@ -26,26 +26,51 @@ class Book extends Model
         'published_date' => 'date',
     ];
 
+    /**
+     * 書籍に付いたジャンル（中間表 book_genre）。
+     *
+     * @return BelongsToMany<Genre, $this>
+     */
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class)->withTimestamps();
     }
 
+    /**
+     * 書籍を登録した人。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * 書籍へのレビュー。
+     *
+     * @return HasMany<Review, $this>
+     */
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
+    /**
+     * 書籍を対象にした読書計画。
+     *
+     * @return HasMany<ReadingPlan, $this>
+     */
     public function readingPlans(): HasMany
     {
         return $this->hasMany(ReadingPlan::class);
     }
 
+    /**
+     * 書籍をお気に入りにした人（中間表 favorites）。
+     *
+     * @return BelongsToMany<User, $this>
+     */
     public function favoriteByUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
@@ -58,6 +83,10 @@ class Book extends Model
 
     /**
      * タイトルか著者にキーワードを部分一致で含む書籍に絞る。
+     *
+     * @param  Builder<static>  $query  クエリ
+     * @param  ?string  $keyword  キーワード（空なら絞らない）
+     * @return Builder<static> 絞り込んだクエリ
      */
     public function scopeKeyword(Builder $query, ?string $keyword): Builder
     {
@@ -69,6 +98,10 @@ class Book extends Model
 
     /**
      * 指定したジャンルに紐づく書籍に絞る。空なら絞らない。
+     *
+     * @param  Builder<static>  $query  クエリ
+     * @param  int|string|null  $genreId  ジャンルID（空なら絞らない）
+     * @return Builder<static> 絞り込んだクエリ
      */
     public function scopeInGenre(Builder $query, int|string|null $genreId): Builder
     {
@@ -79,6 +112,10 @@ class Book extends Model
     /**
      * 並び順を当てる。rating は reviews_avg_rating（withAvg）が要り、レビューの無い書籍は最後になる。
      * 知らない値は latest として扱う。
+     *
+     * @param  Builder<static>  $query  クエリ
+     * @param  ?string  $sort  並び順（latest・newest・oldest・title・rating）
+     * @return Builder<static> 絞り込んだクエリ
      */
     public function scopeSortBy(Builder $query, ?string $sort): Builder
     {

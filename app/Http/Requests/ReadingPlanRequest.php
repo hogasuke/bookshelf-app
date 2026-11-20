@@ -13,11 +13,21 @@ use Illuminate\Validation\Rule;
  */
 class ReadingPlanRequest extends FormRequest
 {
+    /**
+     * このリクエスト自体では利用者を絞らない（ログインの要否はルート、本人かどうかはPolicyで判定する）。
+     *
+     * @return bool 常に true
+     */
     public function authorize(): bool
     {
         return true;
     }
 
+    /**
+     * 項目ごとのバリデーションルール。
+     *
+     * @return array<string, mixed> 項目ごとのバリデーションルール
+     */
     public function rules(): array
     {
         $rules = [
@@ -38,6 +48,11 @@ class ReadingPlanRequest extends FormRequest
         return $rules;
     }
 
+    /**
+     * バリデーションエラーの日本語メッセージ。
+     *
+     * @return array<string, string> ルールごとのエラーメッセージ
+     */
     public function messages(): array
     {
         return [

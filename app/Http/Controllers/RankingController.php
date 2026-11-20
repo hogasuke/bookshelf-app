@@ -7,6 +7,11 @@ use Illuminate\View\View;
 
 class RankingController extends Controller
 {
+    /**
+     * レビューのある書籍を平均評価の高い順に10件出す。
+     *
+     * @return View 画面
+     */
     public function index(): View
     {
         $rankedBooks = Book::whereHas('reviews')->withAvg('reviews', 'rating')

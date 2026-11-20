@@ -7,6 +7,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ReviewRequest extends FormRequest
 {
+    /**
+     * このリクエスト自体では利用者を絞らない（ログインの要否はルート、本人かどうかはPolicyで判定する）。
+     *
+     * @return bool 常に true
+     */
     public function authorize(): bool
     {
         return true;
@@ -14,6 +19,8 @@ class ReviewRequest extends FormRequest
 
     /**
      * レビュー投稿・編集で共通のルール。投稿時だけ、同じ書籍への2件目を止める（reviews の user_id・book_id は一意）。
+     *
+     * @return array<string, mixed> 項目ごとのバリデーションルール
      */
     public function rules(): array
     {
@@ -24,7 +31,7 @@ class ReviewRequest extends FormRequest
 
         $book = $this->route('book');
         if ($book !== null) {
-            $rules['rating'][] = function (string $attribute, mixed $value, Closure $fail) use ($book) {
+            $rules['rating'][] = function (string $attribute, mixed $value, Closure $fail) use ($book): void {
                 if ($this->user()->reviews()->whereBelongsTo($book)->exists()) {
                     $fail('この書籍には既にレビューを投稿しています。');
                 }
@@ -34,6 +41,11 @@ class ReviewRequest extends FormRequest
         return $rules;
     }
 
+    /**
+     * バリデーションエラーの日本語メッセージ。
+     *
+     * @return array<string, string> ルールごとのエラーメッセージ
+     */
     public function messages(): array
     {
         return [

@@ -15,11 +15,21 @@ class ReviewLike extends Model
         'review_id',
     ];
 
+    /**
+     * いいねした人。
+     *
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * いいねされたレビュー。
+     *
+     * @return BelongsTo<Review, $this>
+     */
     public function review(): BelongsTo
     {
         return $this->belongsTo(Review::class);

@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // キーは任意（無くても少量なら引ける。多く使う時だけ .env に GOOGLE_BOOKS_API_KEY を置く）
+    'google_books' => [
+        'key' => env('GOOGLE_BOOKS_API_KEY'),
+    ],
+
 ];

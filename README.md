@@ -140,7 +140,7 @@ erDiagram
 
 ## 環境構築手順
 
-COACHTECH の「環境構築手順」で作った環境で動きます。このリポジトリを使う場合は、次の手順で再現できます。
+COACHTECH 模擬案件の要件シート「環境構築手順」に沿って作った環境です（応用版の画面テンプレート＝Advancedブランチの `resources/` は取り込み済み、phpMyAdmin も `compose.yaml` に追加済み）。このリポジトリからは、次の手順で再現できます。
 
 1. リポジトリを取得する
 
@@ -149,13 +149,13 @@ COACHTECH の「環境構築手順」で作った環境で動きます。この�
     cd bookshelf-app
     ```
 
-2. PHP の依存パッケージを入れる（ローカルに PHP が無くても Docker で実行できます）
+2. PHP の依存パッケージを入れる（ローカルに PHP が無くても Docker で実行できます。このイメージは `vendor/` を作るためだけに使い、アプリは Sail の PHP 8.5 で動きます）
 
     ```bash
     docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/var/www/html" -w /var/www/html -e COMPOSER_CACHE_DIR=/tmp/composer_cache laravelsail/php82-composer:latest composer install --ignore-platform-reqs
     ```
 
-3. `.env` を作る（DB 接続は学校指定の値が入っています）
+3. `.env` を作る（コピーするだけで、DB 接続は要件シート指定の次の値になっています。書き換えは不要です）
 
     ```bash
     cp .env.example .env
@@ -170,13 +170,18 @@ COACHTECH の「環境構築手順」で作った環境で動きます。この�
     DB_PASSWORD=password
     ```
 
-4. Sail を起動する（phpMyAdmin も `compose.yaml` に追加済み）
+4. Sail を起動する（初回はイメージの作成に数分かかります。`WWWUSER`・`WWWGROUP` は sail が自動で入れるので設定不要です）
 
     ```bash
     ./vendor/bin/sail up -d
     ```
 
-    以降は `sail` のエイリアス（`alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'`）を設定した前提で書きます。
+    以降の手順で `sail` だけで実行できるよう、エイリアスを設定します。
+
+    ```bash
+    echo "alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'" >> ~/.zshrc
+    exec $SHELL
+    ```
 
 5. アプリケーションキーを作る
 
@@ -192,14 +197,14 @@ COACHTECH の「環境構築手順」で作った環境で動きます。この�
 
     作り直す時は `sail artisan migrate:fresh --seed`。
 
-7. フロントエンドを用意する（応用版の Blade は `resources/` に取り込み済み）
+7. フロントエンドを用意する
 
     ```bash
     sail npm install
     sail npm run dev
     ```
 
-    開発サーバーを立ち上げずに確認する場合は `sail npm run build`。
+    `sail npm run dev` は開いたままにしておくコマンドなので、ほかの操作は別のターミナルで行います。開発サーバーを使わずに確認する場合は、代わりに `sail npm run build` を1回実行します。
 
 ### ログイン用の初期ユーザー
 
